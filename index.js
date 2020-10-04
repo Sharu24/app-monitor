@@ -1,6 +1,8 @@
 const http = require('http');
 const url = require('url');
 const stringDecoder = require('string_decoder').StringDecoder;
+const handlers = require('./lib/handlers');
+const helpers = require('./lib/helpers');
 
 const port = process.env.PORT || 3000;
 
@@ -31,7 +33,7 @@ const server = http.createServer((req, res) => {
             'queryStringObject': queryStringObject,
             'method': method,
             'headers': headers,
-            'payload': buffer
+            'payload': helpers.parseJsonToObject(buffer)
         }
         const chosenHandler = typeof (router[trimmedPath]) !== 'undefined' ? router[trimmedPath] : handlers.notFound;
         //Route the request to the handler specified inthe router
@@ -54,22 +56,8 @@ server.listen(port, () => {
     console.log(`Server Started on ${port}`);
 })
 
-const handlers = {};
-//Smaple Handler
-handlers.sample = (clientData, callback) => {
-    callback(200, { "Status": "You are in /sample Route" });
-}
-
-handlers.homePage = (clientData, callback) => {
-    callback(200, { "Status": "Home Page Route" });
-}
-
-handlers.notFound = (clientData, callback) => {
-    callback(404, { "Status": "Not Found" });
-}
-
 //Implementing a Router
 const router = {
-    'sample': handlers.sample,
+    'users': handlers.users,
     '': handlers.homePage
 }
