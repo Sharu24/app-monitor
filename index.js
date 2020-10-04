@@ -59,5 +59,6 @@ server.listen(port, () => {
 //Implementing a Router
 const router = {
     'users': handlers.users,
-    '': handlers.homePage
+    '': handlers.homePage,
+    'tokens': handlers.tokens
 }
