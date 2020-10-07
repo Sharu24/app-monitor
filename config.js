@@ -4,7 +4,7 @@ const configs = {
     'twilio': {
         'fromPhone': '+12096385801',
         'accountSid': 'ACc4f195098443386812cfa94a5a9f7e4d',
-        'authToken': '957eeb939536ad3550cb915639c8a5c3'
+        'authToken': '4469c96c58c9508db6b2c7089d95b247'
     }
 };
 
