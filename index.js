@@ -8,7 +8,6 @@ app.init = ()=>{
     server.init();
     
     //Start the Server background service workers
-
     workers.init();
 
 }
