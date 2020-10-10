@@ -98,7 +98,7 @@ users.get = async (clientData) => {
         //Verify the given token is valid for the given user
         if (!istokenValid) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "UnAuthorised. No Access Token is in Headers"
             })
         }
@@ -106,7 +106,7 @@ users.get = async (clientData) => {
 
         if (!data) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "User does not exist."
             })
 
@@ -170,14 +170,14 @@ users.put = async clientData => {
         const istokenValid = await tokens.verify(token, phone);
         if (!istokenValid) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "UnAuthorised. No Access Token is in Headers"
             })
         }
         const userData = await _data.read('users', phone);
         if (!userData) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "An User with this phone number doesnt exist."
             })
         }
@@ -237,7 +237,7 @@ users.delete = async clientData => {
         const istokenValid = await tokens.verify(token, phone);
         if (!istokenValid) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "UnAuthorised. No Access Token is in Headers"
             })
         }
@@ -245,7 +245,7 @@ users.delete = async clientData => {
         const data = await _data.read('users', phone);
         if (!data) {
             return Promise.resolve({
-                statusCode: 403,
+                statusCode: helpers.statusCodes.UNAUTHORIZED,
                 message: "An User with this phone number doesnt exist."
             })
         }
