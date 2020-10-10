@@ -263,27 +263,40 @@ users.delete = async clientData => {
             })
 
         }
-        userChecks.forEach(async check => {
-            await _data.delete('checks', check);
-            checksDeleted++;
-            if (checksDeleted === checksToDelete) {
-                return Promise.resolve({
-                    statusCode: 200,
-                    message: "User Account Deleted Successfully"
-                })
-            }
-            if (deletionErrors) {
-                return Promise.resolve({
-                    statusCode: 200,
-                    message: "Server Error"
-                })
-            }
-            // return Promise.resolve({
-            //     statusCode: 200,
-            //     message: "User Account Deleted Successfully"
-            // });
 
+        let checksPromise = [];
+        if (userChecks.length) {
+            userChecks.forEach(check => {
+            checksPromise.push(_data.delete("checks", check));
+        });
+        }
+        await Promise.all(checksPromise);
+        return Promise.resolve({
+            statusCode: 200,
+            message: "User Account Deleted Successfully"
         })
+
+        // userChecks.forEach(async check => {
+        //     await _data.delete('checks', check);
+        //     checksDeleted++;
+        //     if (checksDeleted === checksToDelete) {
+        //         return Promise.resolve({
+        //             statusCode: 200,
+        //             message: "User Account Deleted Successfully"
+        //         })
+        //     }
+        //     if (deletionErrors) {
+        //         return Promise.resolve({
+        //             statusCode: 200,
+        //             message: "Server Error"
+        //         })
+        //     }
+        //     // return Promise.resolve({
+        //     //     statusCode: 200,
+        //     //     message: "User Account Deleted Successfully"
+        //     // });
+
+        // })
 
     } catch (error) {
         return Promise.reject({

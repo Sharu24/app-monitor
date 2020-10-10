@@ -129,7 +129,7 @@ checks.post = async (clientData) => {
         ? userData.checks
         : [];
     // Check maxchecks count
-    if (userChecks.length > config.maxChecks) {
+    if (userChecks.length >= config.maxChecks) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
         message: `User already exhausted maximum number of Checks. The limit is ${config.maxChecks}`,
