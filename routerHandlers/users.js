@@ -1,15 +1,15 @@
-const checks = require("./checks");
 const tokens = require("./tokens");
-const helpers = require("./helpers");
+const helpers = require("../lib/helpers");
+const _data = require('../lib/data');
 
-handlers.users = {};
+const users = {};
 /*
 User Registration Route
 POST Method
 Schema : firstName, lastName, phone(Unique), password, tosAgreement, email //Required Data
 Optional Data : none
 */
-handlers.users.post = async clientData => {
+users.post = async clientData => {
     try {
         //Data Validation
         const firstName = typeof (clientData.payload.firstName) === 'string' &&
@@ -77,7 +77,7 @@ Optional Data : none
 Private route
 */
 
-handlers.users.get = async (clientData) => {
+users.get = async (clientData) => {
     try {
         const phone = typeof (clientData.queryStringObject.phone) === 'string' &&
             clientData.queryStringObject.phone.trim().length === 10 ?
@@ -107,7 +107,7 @@ handlers.users.get = async (clientData) => {
         if (!data) {
             return Promise.resolve({
                 statusCode: 403,
-                message: "UnAuthorised. No Access Token is in Headers"
+                message: "User does not exist."
             })
 
         }
@@ -115,7 +115,7 @@ handlers.users.get = async (clientData) => {
         delete data.tosAgreement;
         return Promise.resolve({
             statusCode: 200,
-            message: "User was created Successfully"
+            message: data
         });
 
     } catch (error) {
@@ -136,7 +136,7 @@ PUT Method
 Required Data : phone
 Optional Data : rest of the fileds except tosAgreement
 */
-handlers.users.put = async clientData => {
+users.put = async clientData => {
     try {
         //Check phone valid
         const phone = typeof (clientData.payload.phone) === 'string' &&
@@ -156,7 +156,7 @@ handlers.users.put = async clientData => {
             clientData.payload.email.trim().length > 0 ?
             clientData.payload.email.trim() : false;
 
-        if (!phone && !(firstName || lastName || password || email)) {
+        if (!phone || !(firstName || lastName || password || email)) {
             return Promise.resolve({
                 statusCode: 400,
                 message: "Missing Fields/Validation Error"
@@ -174,7 +174,7 @@ handlers.users.put = async clientData => {
                 message: "UnAuthorised. No Access Token is in Headers"
             })
         }
-        const userData = _data.read('users', phone);
+        const userData = await _data.read('users', phone);
         if (!userData) {
             return Promise.resolve({
                 statusCode: 403,
@@ -208,11 +208,6 @@ handlers.users.put = async clientData => {
 
 }
 
-
-
-
-
-
 /*
 User  Route
 DELETE Method
@@ -220,7 +215,7 @@ Required Data : phone
 Optional Data : none
 Private route
 */
-handlers.users.delete = async clientData => {
+users.delete = async clientData => {
     try {
         //Check phone valid
         const phone = typeof (clientData.queryStringObject.phone) === 'string' &&
@@ -247,7 +242,7 @@ handlers.users.delete = async clientData => {
             })
         }
         //Look up if the user record exists
-        const data = _data.read('users', phone);
+        const data = await _data.read('users', phone);
         if (!data) {
             return Promise.resolve({
                 statusCode: 403,

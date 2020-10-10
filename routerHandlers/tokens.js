@@ -1,5 +1,5 @@
-const helpers = require("./helpers");
-const _data = require("./data");
+const helpers = require("../lib/helpers");
+const _data = require("../lib/data");
 
 const tokens = {};
 
@@ -66,7 +66,7 @@ tokens.post = async clientData => {
 
     // hash the sent password and compare it with the
     // existing hash password in the userData
-    const hashedPassword = hash(password);
+    const hashedPassword = helpers.hash(password);
     if (userData.hashedPassword !== hashedPassword) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
@@ -76,7 +76,7 @@ tokens.post = async clientData => {
 
     // Create the token for the valid user
     const tokenId = helpers.createRandomString(20);
-    const expires = Date.now() + 1000 * 60 * 5;
+    const expires = Date.now() + 1000 * 60 * 60;
 
     const tokenObject = {
       phone: phone,

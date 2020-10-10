@@ -1,7 +1,7 @@
 const config = require("../config");
-const data = require("./data");
+const data = require("../lib/data");
 const tokens = require("./tokens");
-const helpers = require("./helpers");
+const helpers = require("../lib/helpers");
 
 const checks = {};
 
