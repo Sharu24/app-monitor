@@ -32,7 +32,7 @@ users.post = async clientData => {
 
         if (!(firstName && lastName && phone && password && tosAgreement && email)) {
             return Promise.resolve({
-                statusCode: 400,
+                statusCode: helpers.statusCodes.BAD_REQUEST,
                 message: "Missing Fields/Validation Error"
 
             })
@@ -41,7 +41,7 @@ users.post = async clientData => {
         const parsedData = await _data.read('users', phone);
         if (parsedData) {
             return Promise.resolve({
-                statusCode: 400,
+                statusCode: helpers.statusCodes.BAD_REQUEST,
                 message: "An User with this phone number already registered"
             })
         }
@@ -61,11 +61,11 @@ users.post = async clientData => {
         await _data.create("users", phone, userObject);
 
         return Promise.resolve({
-            statusCode: 200,
+            statusCode: helpers.statusCodes.SUCCESS,
             message: "User was created Successfully"
         });
     } catch (err) {
-        return Promise.reject({ statusCode: 500, message: "Servor Error" })
+        return Promise.reject({ statusCode: helpers.statusCodes.SERVER_ERROR, message: "Servor Error" })
     }
 
 }
@@ -85,7 +85,7 @@ users.get = async (clientData) => {
         //Check phone valid
         if (!phone) {
             return Promise.resolve({
-                statusCode: 400,
+                statusCode: helpers.statusCodes.BAD_REQUEST,
                 message: "Missing Fields/Validation Error"
 
             })
@@ -114,13 +114,13 @@ users.get = async (clientData) => {
         delete data.hashedPassword;
         delete data.tosAgreement;
         return Promise.resolve({
-            statusCode: 200,
+            statusCode: helpers.statusCodes.SUCCESS,
             message: data
         });
 
     } catch (error) {
         return Promise.reject({
-            statusCode: 400,
+            statusCode: helpers.statusCodes.BAD_REQUEST,
             message: "Missing Fields/Validation"
         })
 
@@ -158,7 +158,7 @@ users.put = async clientData => {
 
         if (!phone || !(firstName || lastName || password || email)) {
             return Promise.resolve({
-                statusCode: 400,
+                statusCode: helpers.statusCodes.BAD_REQUEST,
                 message: "Missing Fields/Validation Error"
 
             })
@@ -194,13 +194,13 @@ users.put = async clientData => {
 
         await _data.update("users", phone, userData);
         return Promise.resolve({
-            statusCode: 200,
+            statusCode: helpers.statusCodes.SUCCESS,
             message: "User Profile Updated"
         });
 
     } catch (error) {
         return Promise.reject({
-            statusCode: 400,
+            statusCode: helpers.statusCodes.BAD_REQUEST,
             message: "Missing Fields/Validation"
         })
 
@@ -224,7 +224,7 @@ users.delete = async clientData => {
 
         if (!phone) {
             return Promise.resolve({
-                statusCode: 400,
+                statusCode: helpers.statusCodes.BAD_REQUEST,
                 message: "Missing Fields/Validation Error"
 
             })
@@ -258,7 +258,7 @@ users.delete = async clientData => {
         let checksDeleted = 0;
         if (checksToDelete <= 0) {
             return Promise.resolve({
-                statusCode: 200,
+                statusCode: helpers.statusCodes.SUCCESS,
                 message: "User Account Deleted Successfully"
             })
 
@@ -272,7 +272,7 @@ users.delete = async clientData => {
         }
         await Promise.all(checksPromise);
         return Promise.resolve({
-            statusCode: 200,
+            statusCode: helpers.statusCodes.SUCCESS,
             message: "User Account Deleted Successfully"
         })
 
@@ -281,18 +281,18 @@ users.delete = async clientData => {
         //     checksDeleted++;
         //     if (checksDeleted === checksToDelete) {
         //         return Promise.resolve({
-        //             statusCode: 200,
+        //             statusCode: helpers.statusCodes.SUCCESS,
         //             message: "User Account Deleted Successfully"
         //         })
         //     }
         //     if (deletionErrors) {
         //         return Promise.resolve({
-        //             statusCode: 200,
+        //             statusCode: helpers.statusCodes.SUCCESS,
         //             message: "Server Error"
         //         })
         //     }
         //     // return Promise.resolve({
-        //     //     statusCode: 200,
+        //     //     statusCode: helpers.statusCodes.SUCCESS,
         //     //     message: "User Account Deleted Successfully"
         //     // });
 
@@ -300,7 +300,7 @@ users.delete = async clientData => {
 
     } catch (error) {
         return Promise.reject({
-            statusCode: 400,
+            statusCode: helpers.statusCodes.BAD_REQUEST,
             message: "Missing Fields/Validation"
         })
 
