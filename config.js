@@ -3,7 +3,7 @@ const configs = {
     'maxChecks': 5,
     'twilio': {
         'fromPhone': '+17608914430',
-        'accountSid': 'ACc4f195098443386812cfa94a5a9f7e4d',
+        'accountSid': 'AC6adb978dab60c2b250a02590d01d51bd',
         'authToken': 'd4cc7e5b05d682f18bcb301bb949f1c6'
     }
 };

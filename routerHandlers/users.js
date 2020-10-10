@@ -266,12 +266,11 @@ users.delete = async clientData => {
         userChecks.forEach(async check => {
             await _data.delete('checks', check);
             checksDeleted++;
-            if (checksDeleted !== checksToDelete) {
+            if (checksDeleted === checksToDelete) {
                 return Promise.resolve({
                     statusCode: 200,
                     message: "User Account Deleted Successfully"
                 })
-
             }
             if (deletionErrors) {
                 return Promise.resolve({
@@ -279,10 +278,10 @@ users.delete = async clientData => {
                     message: "Server Error"
                 })
             }
-            return Promise.resolve({
-                statusCode: 200,
-                message: "User Account Deleted Successfully"
-            });
+            // return Promise.resolve({
+            //     statusCode: 200,
+            //     message: "User Account Deleted Successfully"
+            // });
 
         })
 
