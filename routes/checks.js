@@ -1,18 +1,20 @@
-const config = require("../config");
-const data = require("../lib/data");
-const tokens = require("./tokens");
+const config = require("../lib/config");
 const helpers = require("../lib/helpers");
+const data = require("../store/data");
+const tokens = require("./tokens");
 
 const checks = {};
 
-/*
-Service Checker  Route (To Create a New Service Checker)
-GET Method
-Required Data : id
-Optional Data : none
-Private Route
-*/
-checks.get = async (clientData) => {
+/**--------------------------------------------------------
+ * Service Checker Route (To fetch a Service Checker)
+ * 
+ * @method       GET
+ * @params       id(check)
+ * @required     id(check)
+ * @optional     none
+ * @privateRoute yes
+ ----------------------------------------------------------*/
+checks.get = async clientData => {
   try {
     // Get id from query string
     let { id } = clientData.queryStringObject;
@@ -20,7 +22,7 @@ checks.get = async (clientData) => {
     if (!id) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.BAD_REQUEST,
-        message: "Validation Failed/Missing Fields",
+        message: "Validation Failed/Missing Fields"
       });
     }
     // Get the Checks data for the given id
@@ -28,7 +30,7 @@ checks.get = async (clientData) => {
     if (!checkData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.NOT_FOUND,
-        message: "Check id doesn't exist",
+        message: "Check id doesn't exist"
       });
     }
     // Get access token from request header
@@ -41,37 +43,40 @@ checks.get = async (clientData) => {
     if (!istokenValid) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: "Unauthorised/Token expired",
+        message: "Unauthorised/Token expired"
       });
     }
     return Promise.resolve({
       statusCode: helpers.statusCodes.SUCCESS,
-      message: checkData,
+      message: checkData
     });
   } catch (err) {
     console.log(err);
     return Promise.reject({
       statusCode: helpers.statusCodes.SERVER_ERROR,
-      message: "Server Error",
+      message: "Server Error"
     });
   }
 };
 
-/*
-Service Checker Route (To Create a New Service Checker)
-POST Method
-Required Data : protocol,url,method,successCodes,timeoutSeconds
-Optional Data : none
-Private Route
-*/
-checks.post = async (clientData) => {
+/**--------------------------------------------------------
+ * Service Checker Route (To Create a New Service Checker)
+ * 
+ * @method       POST
+ * @params       protocol, url, method, successCodes, 
+ *               timeoutSeconds
+ * @required     all
+ * @optional     none
+ * @privateRoute yes
+ ----------------------------------------------------------*/
+checks.post = async clientData => {
   try {
     let {
       protocol,
       url,
       method,
       successCodes,
-      timeoutSeconds,
+      timeoutSeconds
     } = clientData.payload;
     // Get all required fields from request payload
     protocol =
@@ -101,7 +106,7 @@ checks.post = async (clientData) => {
     if (!(protocol && url && method && successCodes && timeoutSeconds)) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.BAD_REQUEST,
-        message: "Validation failed/Missing fields",
+        message: "Validation failed/Missing fields"
       });
     }
     // Get the token from request headers
@@ -113,15 +118,27 @@ checks.post = async (clientData) => {
     if (!tokenData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: "Unauthorised/Token expired",
+        message: "Unauthorised/Token expired"
       });
     }
     const userPhone = tokenData.phone;
+
+    // ** To be removed later ** START
+    const istokenValid = await tokens.verify(token, userPhone);
+    //Verify the given token is valid for the given user
+    if (!istokenValid) {
+      return Promise.resolve({
+        statusCode: helpers.statusCodes.UNAUTHORIZED,
+        message: "UnAuthorised. No Access Token is in Headers"
+      });
+    }
+    // ** To be removed later ** END
+
     const userData = await data.read("users", userPhone);
     if (!userData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: "Unauthorised. No User available with this token",
+        message: "Unauthorised. No User available with this token"
       });
     }
     const userChecks =
@@ -132,7 +149,7 @@ checks.post = async (clientData) => {
     if (userChecks.length >= config.maxChecks) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: `User already exhausted maximum number of Checks. The limit is ${config.maxChecks}`,
+        message: `User already exhausted maximum number of Checks. The limit is ${config.maxChecks}`
       });
     }
     // Create a random id for the Check
@@ -144,7 +161,7 @@ checks.post = async (clientData) => {
       url,
       method,
       successCodes,
-      timeoutSeconds,
+      timeoutSeconds
     };
     await data.create("checks", checkId, checkObject);
     // Add Check data to Users schema
@@ -154,25 +171,29 @@ checks.post = async (clientData) => {
     await data.update("users", userPhone, userData);
     return Promise.resolve({
       statusCode: helpers.statusCodes.SUCCESS,
-      message: checkObject,
+      message: checkObject
     });
   } catch (err) {
     err;
     return Promise.reject({
       statusCode: helpers.statusCodes.SERVER_ERROR,
-      message: "Server Error",
+      message: "Server Error"
     });
   }
 };
 
-/*
-Service Checker  Route (To Update a Existing Service Checker)
-PUT Method
-Required Data : id
-Optional Data : rest of the fields (one must be required)
-Private Route
-*/
-checks.put = async (clientData) => {
+/**--------------------------------------------------------
+ * Service Checker Route (To Update a Service Checker)
+ * 
+ * @method       PUT
+ * @params       id, protocol, url, method, successCodes, 
+ *               timeoutSeconds
+ * @required     id
+ * @optional     protocol, url, method, successCodes, 
+ *               timeoutSeconds
+ * @privateRoute yes
+ ----------------------------------------------------------*/
+checks.put = async clientData => {
   try {
     let {
       id,
@@ -180,7 +201,7 @@ checks.put = async (clientData) => {
       url,
       method,
       successCodes,
-      timeoutSeconds,
+      timeoutSeconds
     } = clientData.payload;
     // Get id from request payload
     id = typeof id === "string" && id.trim().length === 20 ? id.trim() : false;
@@ -212,14 +233,14 @@ checks.put = async (clientData) => {
     if (!id && !(protocol || url || method || successCodes || timeoutSeconds)) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.BAD_REQUEST,
-        message: "Validation failed/Missing fields",
+        message: "Validation failed/Missing fields"
       });
     }
     const checkData = await data.read("checks", id);
     if (!checkData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.NOT_FOUND,
-        message: "Check id doesn't exist",
+        message: "Check id doesn't exist"
       });
     }
     // Get access token from request headers
@@ -230,7 +251,7 @@ checks.put = async (clientData) => {
     if (!istokenValid) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: "Unauthorised/Token expired",
+        message: "Unauthorised/Token expired"
       });
     }
     // Update the Check data with new values
@@ -253,25 +274,27 @@ checks.put = async (clientData) => {
     await data.update("checks", id, checkData);
     return Promise.resolve({
       statusCode: helpers.statusCodes.SUCCESS,
-      message: checkData,
+      message: checkData
     });
   } catch (err) {
     console.log(err);
     return Promise.reject({
       statusCode: helpers.statusCodes.SERVER_ERROR,
-      message: "Server Error",
+      message: "Server Error"
     });
   }
 };
 
-/*
-Service Checker  Route (To Delete a Existing Service Check)
-DELETE Method
-Required Data : id
-Optional Data : none
-Private Route
-*/
-checks.delete = async (clientData) => {
+/**--------------------------------------------------------
+ * Service Checker Route (To delete a Service Checker)
+ * 
+ * @method       DELETE
+ * @params       id(check)
+ * @required     id(check)
+ * @optional     none
+ * @privateRoute yes
+ ----------------------------------------------------------*/
+checks.delete = async clientData => {
   try {
     // Get id from request query string
     let { id } = clientData.queryStringObject;
@@ -279,14 +302,14 @@ checks.delete = async (clientData) => {
     if (!id) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.BAD_REQUEST,
-        message: "Validation failed/Missing fields",
+        message: "Validation failed/Missing fields"
       });
     }
     const checkData = await data.read("checks", id);
     if (!checkData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.NOT_FOUND,
-        message: "Check id doesn't exist",
+        message: "Check id doesn't exist"
       });
     }
     // Get the access token from request headers
@@ -297,7 +320,7 @@ checks.delete = async (clientData) => {
     if (!istokenValid) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.UNAUTHORIZED,
-        message: "Unauthorised/Token expired.",
+        message: "Unauthorised/Token expired."
       });
     }
     // Delete the check Data
@@ -309,7 +332,7 @@ checks.delete = async (clientData) => {
     if (!userData) {
       return Promise.resolve({
         statusCode: helpers.statusCodes.BAD_REQUEST,
-        message: "Could not find the specified User",
+        message: "Could not find the specified User"
       });
     }
     const userChecks =
@@ -324,14 +347,14 @@ checks.delete = async (clientData) => {
       await data.update("users", checkData.userPhone, userData);
       return Promise.resolve({
         statusCode: helpers.statusCodes.SUCCESS,
-        message: "Check id is deleted and User schema is updated",
+        message: "Check id is deleted and User schema is updated"
       });
     }
   } catch (err) {
     console.log(err);
     return Promise.reject({
       statusCode: helpers.statusCodes.SERVER_ERROR,
-      message: "Server Error",
+      message: "Server Error"
     });
   }
 };

@@ -1,21 +1,22 @@
 const helpers = require("../lib/helpers");
-const _data = require("../lib/data");
+const _data = require("../store/data");
 
 const tokens = {};
 
-/**
- * Authentication MiddleWare
- * Purpose: Verify if a given token ID is currently valid
- *          for a given user
- */
-
+/**--------------------------------------------------------
+ * Authentication MiddleWare - Verify if a given token ID 
+ * is currently valid for a given user
+ * 
+ * @params       id(token), phone
+ * @required     id(token), phone
+ * @optional     none
+ ----------------------------------------------------------*/
 tokens.verify = async (id, phone) => {
   try {
     // Verify the token first
     const tokenData = await _data.read("tokens", id);
     if (!tokenData) return Promise.resolve(false);
 
-    console.log(tokenData.phone, phone, tokenData.expires, Date.now());
     //Proceed further to match with a user
     if (tokenData.phone !== phone || tokenData.expires <= Date.now()) {
       return Promise.resolve(false);
@@ -27,12 +28,14 @@ tokens.verify = async (id, phone) => {
   }
 };
 
-/**
- * Tokens Route
- * Method : POST
- * Required Data: phone, password
- * Optional Data: none
- */
+/**--------------------------------------------------------
+ * User Login Route
+ * 
+ * @method       POST
+ * @params       phone, password
+ * @required     phone, password
+ * @optional     none
+ ----------------------------------------------------------*/
 tokens.post = async clientData => {
   try {
     //Validate request query param for phone number
@@ -100,12 +103,14 @@ tokens.post = async clientData => {
   }
 };
 
-/**----------------------------------------------------------------------------
- * Tokens Route
- * Method : GET
- * Required Data: tokenId
- * Optional Data: none
- */
+/**--------------------------------------------------------
+ * To Check if the user has logged in
+ * 
+ * @method       GET
+ * @params       token ID
+ * @required     token ID
+ * @optional     none
+ ----------------------------------------------------------*/
 tokens.get = async clientData => {
   try {
     // CHeck if the tokenId is valid or Not
@@ -145,12 +150,14 @@ tokens.get = async clientData => {
   }
 };
 
-/**----------------------------------------------------------------------------
- * Tokens Route
- * Method : PUT
- * Required Data: tokenId, extend
- * Optional Data: none
- */
+/**--------------------------------------------------------
+ * To Extend the User Session Expiry
+ * 
+ * @method       PUT
+ * @params       tokenID, extendFlag
+ * @required     tokenID, extendFlag
+ * @optional     none
+ ----------------------------------------------------------*/
 tokens.put = async clientData => {
   try {
     //Validate input fields
@@ -187,8 +194,8 @@ tokens.put = async clientData => {
       });
     }
 
-    // Extend the token expiration time for an hour and update the storage
-    tokenData.expires = Date.now() + 1000 * 60 * 60;
+    // Extend the token expiration time & update the storage
+    tokenData.expires = Date.now() + 1000 * 60 * 5;
     await _data.update("tokens", id, tokenData);
     if (!tokenData) {
       return Promise.resolve({
@@ -210,12 +217,14 @@ tokens.put = async clientData => {
   }
 };
 
-/**----------------------------------------------------------------------------
- * Tokens Route
- * Method : DELETE
- * Required Data: tokenId
- * Optional Data: none
- */
+/**--------------------------------------------------------
+ * To Delete a User
+ * 
+ * @method       DELETE
+ * @params       token ID
+ * @required     token ID
+ * @optional     none
+ ----------------------------------------------------------*/
 tokens.delete = async clientData => {
   try {
     // CHeck if the tokenId is valid or Not
